@@ -13,5 +13,17 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="var" path="MyLib/jackson-annotations-2.9.8.jar"/>
+	<classpathentry kind="var" path="MyLib/jackson-core-2.9.8.jar"/>
+	<classpathentry kind="var" path="MyLib/jackson-databind-2.9.8.jar"/>
+	<classpathentry kind="var" path="MyLib/java-jwt-3.4.1.jar"/>
+	<classpathentry kind="var" path="MyLib/jjwt-0.9.1.jar"/>
+	<classpathentry kind="var" path="MyLib/jjwt-api-0.10.5.jar"/>
+	<classpathentry kind="var" path="MyLib/jjwt-impl-0.10.5.jar"/>
+	<classpathentry kind="var" path="MyLib/jjwt-jackson-0.10.5.jar"/>
+	<classpathentry kind="var" path="MyLib/jjwt-orgjson-0.10.5.jar"/>
+	<classpathentry kind="var" path="MyLib/mockito-core-1.10.19.jar"/>
+	<classpathentry kind="var" path="MyLib/objenesis-2.1.jar"/>
+	<classpathentry kind="var" path="MyLib/sendgrid-java-3.2.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
