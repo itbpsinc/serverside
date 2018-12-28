@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="Serverside">
+    <wb-module deploy-name="serverside">
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <property name="context-root" value="svrside"/>
-        <property name="java-output-path" value="/Serverside/build/classes"/>
+        <property name="java-output-path" value="/serverside/build/classes"/>
+        <property name="context-root" value="serverside"/>
     </wb-module>
 </project-modules>
