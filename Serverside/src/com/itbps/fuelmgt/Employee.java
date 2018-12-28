@@ -13,6 +13,16 @@ public class Employee {
 	private String zipcode;
 	private Date dateofhire;
 	private String ssn;
+	private String password;
+	
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	public String getNameid() {
 		return nameid;
