@@ -10,39 +10,47 @@ import javax.sql.DataSource;
 
 import com.itbps.fuelmgt.Employee;
 
-public class SQLServices {
-
-	public Connection getConnection() throws Exception {
+public class SQLServices
+{
+	
+	public static Connection getConnection() throws Exception
+	{
 		Connection conn = null;
-		try {
+		try
+		{
 			Context ctx = new InitialContext();
-			DataSource datasource = (DataSource) ctx.lookup("jdbc/apexdb");
-			if (datasource != null)
-				conn = datasource.getConnection();
-
-		} catch (Exception _exx) {
+			Context envContext = (Context) ctx.lookup("java:/comp/env");
+			DataSource datasource = (DataSource) envContext.lookup("jdbc/apexdb");
+			if (datasource != null) conn = datasource.getConnection();
+			
+		} catch(Exception _exx)
+		{
 			_exx.printStackTrace();
 		}
 		return conn;
 	}
-
-	public Employee getEmployee(String loginid) {
+	
+	public static Employee getEmployee(String loginid)
+	{
 		String sql = "SELECT * FROM apexpms_apex.employee WHERE nameId= ?";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rset = null;
-
+		
 		Employee employee = null;
-
-		try {
-			conn = this.getConnection();
-
-			if (conn != null) {
+		
+		try
+		{
+			conn = getConnection();
+			
+			if (conn != null)
+			{
 				pstmt = conn.prepareStatement(sql);
 				pstmt.setString(1, loginid);
-
+				
 				rset = pstmt.executeQuery();
-				if (rset.next()) {
+				if (rset.next())
+				{
 					employee = new Employee();
 					employee.setAddress1(rset.getString("address1"));
 					employee.setAddress2(rset.getString("address2"));
@@ -54,45 +62,125 @@ public class SQLServices {
 					employee.setDateofhire(rset.getDate("dateofhire"));
 					employee.setState(rset.getString("state"));
 					employee.setSsn(rset.getString("ssn"));
+					employee.setRole(getEmployeeRole(employee.getNameid()));
 				}
 			}
-		} catch (Exception _exx) {
+		} catch(Exception _exx)
+		{
 			_exx.printStackTrace();
-		} finally {
-			try {
-				if (rset != null && !rset.isClosed()) {
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
 					rset.close();
 					rset = null;
 				}
-			} catch (Exception _ex) {
+			} catch(Exception _ex)
+			{
 				// ignore
 			}
-			try {
-				if (pstmt != null && !pstmt.isClosed()) {
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
 					pstmt.close();
 					pstmt = null;
 				}
-			} catch (Exception _ex) {
+			} catch(Exception _ex)
+			{
 				// ignore
 			}
-			try {
-				if (conn != null && !conn.isClosed()) {
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
 					conn.close();
 					conn = null;
 				}
-			} catch (Exception _ex) {
+			} catch(Exception _ex)
+			{
 				// ignore
 			}
-
+			
 		}
-
+		
 		return employee;
-
+		
 	}
-
-	public static void main(String[] args) {
+	
+	private static String getEmployeeRole(String loginid)
+	{
+		String sql = "select role from apexpms_apex.userrole WHERE  nameId=?";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		Employee employee = null;
+		
+		try
+		{
+			conn = getConnection();
+			
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, loginid);
+				
+				rset = pstmt.executeQuery();
+				if (rset.next()) return rset.getString("role");
+				
+			}
+		} catch(Exception _exx)
+		{
+			_exx.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			
+		}
+		
+		return null;
+		
+	}
+	
+	public static void main(String[] args)
+	{
 		// TODO Auto-generated method stub
-
+		
 	}
-
+	
 }

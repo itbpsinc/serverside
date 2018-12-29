@@ -11,39 +11,46 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 
 import com.itbps.fuelmgt.Authval;
+import com.itbps.fuelmgt.Employee;
+import com.itbps.fuelmgt.sql.SQLServices;
 import com.itbps.utils.IUtils;
 
 /**
  * Servlet implementation class Fuellogin
  */
 @WebServlet("/fuellogin")
-public class Fuellogin extends HttpServlet {
+public class Fuellogin extends HttpServlet
+{
 	private static final long serialVersionUID = 1L;
-	private final  String VALID_USER = "Austin:password";
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Fuellogin() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
+	private final String VALID_USER = "Austin:password";
+	
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#HttpServlet()
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("text/plain");
-	     response.sendError(HttpServletResponse.SC_FORBIDDEN, "No GET access.");
-			
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	public Fuellogin()
 	{
-	   
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		// response.setContentType("text/plain");
+		// response.sendError(HttpServletResponse.SC_FORBIDDEN, "No GET access.");
+		
+	}
+	
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		
 		try
 		{
 			
@@ -54,7 +61,7 @@ public class Fuellogin extends HttpServlet {
 			{
 				builder.append(line);
 			}
-
+			
 			String data = builder.toString();
 			
 			JSONObject object = null;
@@ -71,7 +78,7 @@ public class Fuellogin extends HttpServlet {
 				response.getWriter().print(json);
 				return;
 			}
-
+			
 			if (pass == null)
 			{
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -80,42 +87,39 @@ public class Fuellogin extends HttpServlet {
 				return;
 			}
 			
-			if ((name + ":" + pass).equals(VALID_USER))
+			Employee emp = SQLServices.getEmployee(name);
+			
+			String vuser = emp.getNameid().trim().toLowerCase() + ":" + emp.getPassword().trim();
+			if ((name.trim().toLowerCase() + ":" + pass.trim()).equals(vuser))
 			{
-
 				Authval auth = new Authval();
 				auth.setExpiration(10000);
 				auth.setId("JWT-09");
-				;
+				
 				auth.setIssue("ITBPS Inc");
-				;
-				auth.setLoginid("Austin");
-				auth.setName("Onyekachi Anyanwu");
-				auth.setRole("Admin");
-
-
+				
+				auth.setLoginid(emp.getNameid().trim());
+				auth.setName(emp.getFirstName() + " " + emp.getLastName());
+				auth.setRole(emp.getRole());
+				
 				String token = IUtils.createJWT(auth);
-
+				
 				JSONObject jsons = new JSONObject();
 				jsons.put("token", token);
 				
 				response.getWriter().print(jsons.toString());
-			} 
-			else
+			} else
 			{
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				String json = String.format("{\"error\": \"%s\"}", "Username or Password is invalid");
 				response.getWriter().print(json);
 			}
-
-
 			
-		}
-		catch(Exception _exx)
+		} catch(Exception _exx)
 		{
-			 _exx.printStackTrace();
-		} 
+			_exx.printStackTrace();
+		}
 		
 	}
-
+	
 }
