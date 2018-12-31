@@ -93,7 +93,7 @@ public class Fuellogin extends HttpServlet
 			if ((name.trim().toLowerCase() + ":" + pass.trim()).equals(vuser))
 			{
 				Authval auth = new Authval();
-				auth.setExpiration(10000);
+				auth.setExpiration(600000);
 				auth.setId("JWT-09");
 				
 				auth.setIssue("ITBPS Inc");
