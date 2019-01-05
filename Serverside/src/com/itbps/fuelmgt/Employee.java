@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class Employee
 {
+	private int id;
 	private String nameid;
 	private String firstName;
 	private String lastName;
@@ -16,7 +17,31 @@ public class Employee
 	private String ssn;
 	private String password;
 	private String role;
+	private boolean active;
 	
+	
+	
+	
+	public boolean isActive()
+	{
+		return active;
+	}
+
+	public void setActive(boolean active)
+	{
+		this.active = active;
+	}
+
+	public int getId()
+	{
+		return id;
+	}
+
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+
 	public String getRole()
 	{
 		return role;

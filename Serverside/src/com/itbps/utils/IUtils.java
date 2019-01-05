@@ -1,5 +1,7 @@
 package com.itbps.utils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,6 +137,16 @@ public class IUtils
 		// request.authenticate(HttpServletResponse.SC_UNAUTHORIZED)
 		// .header(HttpServletResponse.SC_UNAUTHORIZED, AUTHENTICATION_SCHEME + "
 		// realm=\"" + REALM + "\"").build());
+	}
+	
+	public static String getPrintTrace(Exception _exx)
+	{
+		StringWriter writer = new StringWriter();
+        PrintWriter printWriter= new PrintWriter(writer);
+        _exx.printStackTrace(printWriter);
+        
+        return writer.toString();
+        
 	}
 
 	public static void main(String[] args) {
