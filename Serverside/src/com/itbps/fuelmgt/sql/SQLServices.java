@@ -3,16 +3,24 @@ package com.itbps.fuelmgt.sql;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import javax.sql.RowSet;
 
+import com.google.gson.Gson;
+import com.itbps.fuelmgt.Dispatch;
+import com.itbps.fuelmgt.DispatchList;
 import com.itbps.fuelmgt.Employee;
 import com.itbps.utils.IUtils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 
 public class SQLServices
 {
@@ -33,6 +41,238 @@ public class SQLServices
 			_exx.printStackTrace();
 		}
 		return conn;
+	}
+	
+	public String asJSON(Object apexObj)
+	{
+		String result = null;
+		try
+		{
+			Gson json = new Gson();
+			
+			result = new JSONObject().put("data", json.toJson(apexObj)).toString();
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		}
+		
+		return result;
+		
+	}
+	
+	public String getDispatch(int dispatch)
+	{
+		String sql = "select pk.pickupdispatchId, pk.driverid, em.nameId driver, disbatchid, em2.nameId dispatcher, terminalid, pk.truckname, scheduledate, createddate "
+				+ "from pickupdispatch pk, driver dr, truck tr, employee em, employee em2 " + "where pk.pickupdispatchId = 2  "
+				+ "and  em.id = pk.driverid and   tr.truckname  = pk.truckname " + "and   em2.id  = pk.disbatchid";
+		
+		return asJSON(getDisptachList(sql));
+		
+	}
+	
+	private DispatchList getDisptachList(String sql)
+	{
+		Connection conn = null;
+		ResultSet rset = null;
+		Statement pstmt = null;
+		List<Dispatch> list = new ArrayList<Dispatch>();
+		DispatchList dispList = new DispatchList();
+		Dispatch[] dlist = null;
+		
+		try
+		{
+			conn = getConnection();
+			if (conn != null)
+			{
+				pstmt = conn.createStatement();
+				// pstmt.setInt(1, id);
+				
+				rset = pstmt.executeQuery(sql);
+				
+				while (rset.next())
+				{
+					Dispatch disp = new Dispatch();
+					disp.setCreateddate(rset.getDate("createddate"));
+					disp.setDisbatchid(rset.getInt("disbatchid"));
+					disp.setDispatcher(rset.getString("dispatcher"));
+					disp.setDriver(rset.getString("driver"));
+					disp.setDriverid(rset.getInt("driverid"));
+					disp.setPickupdispatchId(rset.getInt("pickupdispatchId"));
+					disp.setScheduledate(rset.getDate("scheduledate"));
+					disp.setTerminalid(rset.getString("terminalid"));
+					disp.setTruckname(rset.getString("truckname"));
+					list.add(disp);
+					
+				}
+				
+				if (list.size() > 0)
+				{
+					dlist = new Dispatch[list.size()];
+					int count = 0;
+					for (Dispatch dis : list)
+					{
+						dlist[count] = dis;
+						count++;
+					}
+					dispList.setDispatchList(dlist);
+				}
+				
+			}
+			
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			return null;
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+		}
+		return dispList;
+	}
+	
+	private DispatchList getDisptachList(String sql)
+	{
+		Connection conn = null;
+		ResultSet rset = null;
+		Statement pstmt = null;
+		List<Dispatch> list = new ArrayList<Dispatch>();
+		DispatchList dispList = new DispatchList();
+		Dispatch[] dlist = null;
+		
+		try
+		{
+			conn = getConnection();
+			if (conn != null)
+			{
+				pstmt = conn.createStatement();
+				// pstmt.setInt(1, id);
+				
+				rset = pstmt.executeQuery(sql);
+				
+				while (rset.next())
+				{
+					Dispatch disp = new Dispatch();
+					disp.setCreateddate(rset.getDate("createddate"));
+					disp.setDisbatchid(rset.getInt("disbatchid"));
+					disp.setDispatcher(rset.getString("dispatcher"));
+					disp.setDriver(rset.getString("driver"));
+					disp.setDriverid(rset.getInt("driverid"));
+					disp.setPickupdispatchId(rset.getInt("pickupdispatchId"));
+					disp.setScheduledate(rset.getDate("scheduledate"));
+					disp.setTerminalid(rset.getString("terminalid"));
+					disp.setTruckname(rset.getString("truckname"));
+					list.add(disp);
+					
+				}
+				
+				if (list.size() > 0)
+				{
+					dlist = new Dispatch[list.size()];
+					int count = 0;
+					for (Dispatch dis : list)
+					{
+						dlist[count] = dis;
+						count++;
+					}
+					dispList.setDispatchList(dlist);
+				}
+				
+			}
+			
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			return null;
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+		}
+		return dispList;
+	}
+	
+	public String addEmployee(String jsonEmp)
+	{
+		String result = null;
+		try
+		{
+			Gson json = new Gson();
+			
+			Employee emp = this.addEmployee(json.fromJson(jsonEmp, Employee.class));
+			
+			result = new JSONObject().put("data", json.toJson(emp)).toString();
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		}
+		
+		return result;
+		
 	}
 	
 	public Employee addEmployee(Employee emp)
@@ -109,7 +349,6 @@ public class SQLServices
 		return rtnEmp;
 	}
 	
-	
 	public boolean deleteEmployee(int id)
 	{
 		logger.info("deleteEmployee Started...");
@@ -168,7 +407,6 @@ public class SQLServices
 		return result;
 	}
 	
-	
 	public Employee updateEmployee(Employee emp)
 	{
 		logger.info("updateEmployee Started...");
@@ -184,8 +422,7 @@ public class SQLServices
 			if (conn != null)
 			{
 				pstmt = conn.prepareStatement(sql);
-				;
-			    
+				
 				pstmt.setString(1, emp.getFirstName());
 				pstmt.setString(2, emp.getLastName());
 				pstmt.setString(3, emp.getPassword());
@@ -246,6 +483,29 @@ public class SQLServices
 		return rtnEmp;
 	}
 	
+	public String getEmployeeasJSON(int id)
+	{
+		String result = null;
+		try
+		{
+			Gson json = new Gson();
+			
+			Employee emp = this.getEmployee(id);
+			
+			String js = json.toJson(emp);
+			
+			logger.debug(js);
+			
+			result = new JSONObject().put("data", js).toString();
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		}
+		
+		return result;
+		
+	}
 	
 	public static Employee getEmployee(int id)
 	{
@@ -333,7 +593,7 @@ public class SQLServices
 		
 	}
 	
-	public static Employee getEmployee(String loginid)
+	public Employee getEmployee(String loginid)
 	{
 		logger.info("getEmployee(Strng); Started....");
 		
@@ -443,8 +703,7 @@ public class SQLServices
 		{
 			logger.error(IUtils.getPrintTrace(_exx));
 			
-		} 
-		finally
+		} finally
 		{
 			try
 			{

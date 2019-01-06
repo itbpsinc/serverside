@@ -87,7 +87,7 @@ public class Fuellogin extends HttpServlet
 				return;
 			}
 			
-			Employee emp = SQLServices.getEmployee(name);
+			Employee emp = new SQLServices().getEmployee(name);
 			
 			String vuser = emp.getNameid().trim().toLowerCase() + ":" + emp.getPassword().trim();
 			if ((name.trim().toLowerCase() + ":" + pass.trim()).equals(vuser))

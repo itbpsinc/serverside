@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import com.auth0.jwt.interfaces.Claim;
 import com.itbps.fuelmgt.Authval;
+import com.itbps.fuelmgt.sql.SQLServices;
 import com.itbps.utils.IUtils;
 
 import io.jsonwebtoken.Claims;
@@ -51,9 +52,16 @@ public class Fuelservices extends HttpServlet
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		doPost(request, response);
+		//doPost(request, response);
 		// response.setContentType("text/plain");
 		// response.sendError(HttpServletResponse.SC_FORBIDDEN, "No GET access.");
+		
+		String id  = request.getParameter("id");
+		String json = new SQLServices().getDispatch(Integer.parseInt(id));
+		
+		response.setContentType("application/json");
+		response.getWriter().print(json);
+		 
 	}
 
 	/**
