@@ -14,6 +14,17 @@ public class Dispatch
 	private String truckname;
 	private Date scheduledate;
 	private Date createddate;
+	private TruckSchedule[] truckSchedule;
+	
+	public TruckSchedule[] getTruckSchedule()
+	{
+		return truckSchedule;
+	}
+	
+	public void setTruckSchedule(TruckSchedule[] truckSchedule)
+	{
+		this.truckSchedule = truckSchedule;
+	}
 	
 	public int getPickupdispatchId()
 	{

@@ -57,7 +57,7 @@ public class Fuelservices extends HttpServlet
 		// response.sendError(HttpServletResponse.SC_FORBIDDEN, "No GET access.");
 		
 		String id  = request.getParameter("id");
-		String json = new SQLServices().getDispatch(Integer.parseInt(id));
+		String json = new SQLServices().getAllItempickups();
 		
 		response.setContentType("application/json");
 		response.getWriter().print(json);
