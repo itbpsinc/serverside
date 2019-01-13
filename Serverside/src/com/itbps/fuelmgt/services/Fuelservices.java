@@ -1,103 +1,106 @@
 package com.itbps.fuelmgt.services;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.DatatypeConverter;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.json.JSONObject;
 
-import com.auth0.jwt.interfaces.Claim;
-import com.itbps.fuelmgt.Authval;
+import com.itbps.fuelmgt.Itemterminalpickup;
+import com.itbps.fuelmgt.ItemterminalpickupList;
 import com.itbps.fuelmgt.sql.SQLServices;
-import com.itbps.utils.IUtils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.DefaultClaims;
-
-/**
- * Servlet implementation class Fuelservices
- */
-@WebServlet("/fuelservices")
-public class Fuelservices extends HttpServlet
+@Path("/services")
+public class Fuelservices
 {
-	
-
-	/**
-	 * @see HttpServlet#HttpServlet()
+	/*
+	 * @GET
+	 * 
+	 * @Path("/{name}")
+	 * 
+	 * @Produces(MediaType.APPLICATION_JSON) public Response
+	 * getMessage(@PathParam("name") String name) { String outMsg = "Hello " + name
+	 * + "!"; return Response.status(200).entity(outMsg).build(); }
+	 * 
 	 */
-	public Fuelservices()
+	@GET
+	@Path("/ipickup/driver/{id}")
+	@Produces(
+	{ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public ItemterminalpickupList getDriverItemPickup(@PathParam("id") int id)
 	{
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		//doPost(request, response);
-		// response.setContentType("text/plain");
-		// response.sendError(HttpServletResponse.SC_FORBIDDEN, "No GET access.");
-		
-		String id  = request.getParameter("id");
-		String json = new SQLServices().getAllItempickups();
-		
-		response.setContentType("application/json");
-		response.getWriter().print(json);
-		 
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-	{
-		// Get the Authorization header from the request
-       try
-       {
-		String authorizationHeader = request.getHeader("Authorization");
-
-		if (!IUtils.isTokenBasedAuthentication(authorizationHeader))
-			throw new ServletException("No JWT token found in request headers");
-
-		String token = authorizationHeader.substring(IUtils.AUTHENTICATION_SCHEME.length());
-
-		if ( IUtils.isValidToken(token))
+		ItemterminalpickupList json = null;
+		try
 		{
+			json = new SQLServices().getItempickupByDriverId(id);
 			
-			//Perform request
+		} catch(Exception _exx)
+		{
+			_exx.printStackTrace();
 		}
-		else
-		   throw new Exception("Invalid token..   Security Vilation");
 		
-
-       }
-       catch(Exception _exx)
-       {
-		throw new ServletException("No JWT Invalid token found in request headers");	
-       }
+		return json;
 	}
-
 	
+	@GET
+	@Path("/ipickup/{id}")
+	@Produces(
+	{ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Itemterminalpickup getItemPickupById(@PathParam("id") int id)
+	{
+		Itemterminalpickup itemterminalpickup = null;
+		try
+		{
+			itemterminalpickup = new SQLServices().getItempickupById(id);
+			
+		} catch(Exception _exx)
+		{
+			_exx.printStackTrace();
+		}
+		
+		return itemterminalpickup;
+	}
 	
+	@GET
+	@Path("/ipickup/dispatchr/{id}")
+	@Produces(
+	{ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public ItemterminalpickupList getDispatchItemPickup(@PathParam("id") int id)
+	{
+		ItemterminalpickupList json = null;
+		try
+		{
+			json = new SQLServices().getItempickuphByDispatchId(id);
+			
+		} catch(Exception _exx)
+		{
+			_exx.printStackTrace();
+		}
+		
+		return json;
+	}
 	
-
+	@GET
+	@Path("/ipickup")
+	@Produces(
+	{ MediaType.APPLICATION_XML, MediaType.APPLICATION_XML })
+	public ItemterminalpickupList getItemPickup()
+	{
+		ItemterminalpickupList json = null;
+		try
+		{
+			json = new SQLServices().getAllItempickups();
+			
+		} catch(Exception _exx)
+		{
+			_exx.printStackTrace();
+		}
+		
+		return json;
+	}
+	
 }

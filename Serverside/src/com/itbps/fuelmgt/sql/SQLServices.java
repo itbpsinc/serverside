@@ -20,9 +20,9 @@ import com.google.gson.JsonParser;
 import com.itbps.fuelmgt.Dispatch;
 import com.itbps.fuelmgt.DispatchList;
 import com.itbps.fuelmgt.Employee;
-import com.itbps.fuelmgt.Itempickup;
-import com.itbps.fuelmgt.Itempickup;
-import com.itbps.fuelmgt.ItempickupList;
+import com.itbps.fuelmgt.Itemterminalpickup;
+import com.itbps.fuelmgt.Itemterminalpickup;
+import com.itbps.fuelmgt.ItemterminalpickupList;
 import com.itbps.fuelmgt.TruckSchedule;
 import com.itbps.fuelmgt.TruckScheduleList;
 import com.itbps.utils.GSONCreator;
@@ -87,13 +87,13 @@ public class SQLServices
 	}
 	
 	
-	public String createitempickup(String JSONStr)
+	public Itemterminalpickup createitempickup(String JSONStr)
 	{
-		Itempickup disp = null;
-		String resultJSON = null;
+		Itemterminalpickup disp = null;
+		Itemterminalpickup  itemterminalpickup = null;
 		Connection conn = null;
 		PreparedStatement pstmt = null;
-		String sql = "INSERT INTO itempickup (pickupdispatchid, compartmentid, qtypickup, billoflading, pickupdate, createddate, lastupdated, lastupdateduser) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
+		String sql = "INSERT INTO itemterminalpickup (terminaldispatchdetailid, qtypickup, billoflading, pickupdate, createddate, lastupdated, lastupdateduser, verificationdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		try
 		{
@@ -101,20 +101,19 @@ public class SQLServices
 			if (conn != null)
 			{
 				Gson gson = new Gson();
-				disp  = gson.fromJson(JSONStr, Itempickup.class);
+				disp  = gson.fromJson(JSONStr, Itemterminalpickup.class);
 				pstmt = conn.prepareStatement(sql);
-				pstmt.setInt(1, disp.getPickupdispatchid());
-				pstmt.setInt(2, disp.getCompartmentid());
-				pstmt.setDouble(3, disp.getQtypickup());
-				pstmt.setString(4, disp.getBilloflading());
-				pstmt.setDate(5, new java.sql.Date(disp.getPickupdate().getTime()));
+				pstmt.setInt(1, disp.getItemterminalpickupid());
+				pstmt.setDouble(2, disp.getQtypickup());
+				pstmt.setString(3, disp.getBilloflading());
+				pstmt.setDate(4, new java.sql.Date(disp.getPickupdate().getTime()));
+				pstmt.setDate(5, new java.sql.Date(new java.util.Date().getTime()));
 				pstmt.setDate(6, new java.sql.Date(new java.util.Date().getTime()));
-				pstmt.setDate(7, new java.sql.Date(new java.util.Date().getTime()));
-				pstmt.setString(8, disp.getLastupdateduser());
+				pstmt.setString(7, disp.getLastupdateduser());
 				
 				int recordid = pstmt.executeUpdate();
 				
-				resultJSON = this.getItempickupById(recordid);
+				itemterminalpickup = this.getItempickupById(recordid);
 				
 			}
 		} catch(Exception _exx)
@@ -147,128 +146,133 @@ public class SQLServices
 				// ignore
 			}
 		}
-		return resultJSON;
+		return itemterminalpickup;
 		
 	}
 	
 	
-	public String getItempickuphByDispatchId(int id)
+	public ItemterminalpickupList getItempickuphByDispatchId(int id)
 	{
-		String json ="";
+		 ItemterminalpickupList lst = new ItemterminalpickupList();
 		StringBuffer sb = new StringBuffer();
-		sb.append("select it.itemspickupid, it.pickupdispatchid, it.compartmentid, qtypickup, billoflading, "); 
-		sb.append("pickupdate, it.createddate itempickup_createddate, it.lastupdated, it.lastupdateduser, verifierid, verificationdate, ");
-		sb.append("tk.fuelname, tk.scheduledquantity, pi.createddate dispatch_createddate, pi.driverid,  pi.disbatchid, pi.terminalid, pi.truckname, pi.scheduledate, ");
-		sb.append("co.compartment, em.nameId driver, em2.nameId dispatcher ");
-		sb.append("from Itempickup it, pickupdispatch pi, compartment co, truckpickupschedule tk, employee em, employee em2 ");
-		sb.append("where pi.disbatchid = ");
+		
+		sb.append("select itp.itemterminalpickupid, itp.terminaldispatchdetailid, co.compartmentid, qtypickup, billoflading,  ");
+		sb.append("pickupdate, itp.createddate itempickup_createddate, itp.lastupdated, itp.lastupdateduser, verifierid, verificationdate, ");
+		sb.append("tdd.fuelname, tdd.scheduledquantity, td.createddate dispatch_createddate, td.driverid,  td.disbatchid, td.terminalid, ");
+		sb.append("td.truckname, td.scheduledate, co.compartment, em.nameId driver, em2.nameId dispatcher ");
+		sb.append("from itemterminalpickup itp, terminaldispatch td, compartment co, terminaldispatchdetail tdd, employee em, employee em2 ");
+		sb.append("where td.disbatchid = ");
 		sb.append(id);
 		sb.append(" ");
-		sb.append("and   it.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.compartmentid    = it.compartmentid ");
-		sb.append("and   co.compartmentid    = tk.compartmentid ");
-		sb.append("and   pi.driverid = em.id ");
-		sb.append("and   pi.disbatchid = em2.id ");
+		sb.append("and  tdd.terminaldispatchid = td.terminaldispatchid ");
+		sb.append("and   itp.terminaldispatchdetailid = tdd.terminaldispatchdetailid ");
+		sb.append("and    co.compartmentid    = tdd.compartmentid ");
+		sb.append("and   td.driverid = em.id ");
+		sb.append("and   td.disbatchid = em2.id ");
 		
-		 Itempickup[]  pd = getItempickupList(sb.toString());
-		 if (pd.length > 0)
+	
+		
+		
+		 Itemterminalpickup[]  pd = getItempickupList(sb.toString());
+		 if (pd != null && pd.length > 0)
 		 {
-			 json = asJSON(pd);
+			 lst.setPickupList(pd);
 		 }
-		 return json;
+		 return lst;
 		
 	}
 	
-	public String getAllItempickups()
+	public ItemterminalpickupList getAllItempickups()
 	{
 		String json ="";
 		StringBuffer sb = new StringBuffer();
-		sb.append("select it.itemspickupid, it.pickupdispatchid, it.compartmentid, qtypickup, billoflading, "); 
-		sb.append("pickupdate, it.createddate itempickup_createddate, it.lastupdated, it.lastupdateduser, verifierid, verificationdate, ");
-		sb.append("tk.fuelname, tk.scheduledquantity, pi.createddate dispatch_createddate, pi.driverid,  pi.disbatchid, pi.terminalid, pi.truckname, pi.scheduledate, ");
-		sb.append("co.compartment, em.nameId driver, em2.nameId dispatcher ");
-		sb.append("from Itempickup it, pickupdispatch pi, compartment co, truckpickupschedule tk, employee em, employee em2 ");
-		sb.append("where   it.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.compartmentid    = it.compartmentid ");
-		sb.append("and   co.compartmentid    = tk.compartmentid ");
-		sb.append("and   pi.driverid = em.id ");
-		sb.append("and   pi.disbatchid = em2.id ");
 		
-		 Itempickup[]  pd = getItempickupList(sb.toString());
-		 if (pd.length > 0)
+		sb.append("select itp.itemterminalpickupid, itp.terminaldispatchdetailid, co.compartmentid, qtypickup, billoflading,  ");
+		sb.append("pickupdate, itp.createddate itempickup_createddate, itp.lastupdated, itp.lastupdateduser, verifierid, verificationdate, ");
+		sb.append("tdd.fuelname, tdd.scheduledquantity, td.createddate dispatch_createddate, td.driverid,  td.disbatchid, td.terminalid, ");
+		sb.append("td.truckname, td.scheduledate, co.compartment, em.nameId driver, em2.nameId dispatcher ");
+		sb.append("from itemterminalpickup itp, terminaldispatch td, compartment co, terminaldispatchdetail tdd, employee em, employee em2 ");
+		sb.append("where  tdd.terminaldispatchid = td.terminaldispatchid ");
+		sb.append("and   itp.terminaldispatchdetailid = tdd.terminaldispatchdetailid ");
+		sb.append("and    co.compartmentid    = tdd.compartmentid ");
+		sb.append("and   td.driverid = em.id ");
+		sb.append("and   td.disbatchid = em2.id ");
+		
+		 Itemterminalpickup[]  pd = getItempickupList(sb.toString());
+		 ItemterminalpickupList lst = new ItemterminalpickupList();
+		 
+		 if (pd != null && pd.length > 0)
 		 {
-			 json = asJSON(pd);
+			 lst.setPickupList(pd);;
+			// json = asJSON(lst);
 		 }
-		 return json;
-		
+		 return lst;
 	}
 	
-	public String getItempickupByDriverId(int id)
+	public ItemterminalpickupList getItempickupByDriverId(int id)
 	{
+		ItemterminalpickupList pList = new ItemterminalpickupList();
 		String json ="";
 		StringBuffer sb = new StringBuffer();
-		sb.append("select it.itemspickupid, it.pickupdispatchid, it.compartmentid, qtypickup, billoflading, "); 
-		sb.append("pickupdate, it.createddate itempickup_createddate, it.lastupdated, it.lastupdateduser, verifierid, verificationdate, ");
-		sb.append("tk.fuelname, tk.scheduledquantity, pi.createddate dispatch_createddate, pi.driverid,  pi.disbatchid, pi.terminalid, pi.truckname, pi.scheduledate, ");
-		sb.append("co.compartment, em.nameId driver, em2.nameId dispatcher ");
-		sb.append("from Itempickup it, pickupdispatch pi, compartment co, truckpickupschedule tk, employee em, employee em2 ");
-		sb.append("where pi.driverid = ");
+		sb.append("select itp.itemterminalpickupid, itp.terminaldispatchdetailid, co.compartmentid, qtypickup, billoflading,  ");
+		sb.append("pickupdate, itp.createddate itempickup_createddate, itp.lastupdated, itp.lastupdateduser, verifierid, verificationdate, ");
+		sb.append("tdd.fuelname, tdd.scheduledquantity, td.createddate dispatch_createddate, td.driverid,  td.disbatchid, td.terminalid, ");
+		sb.append("td.truckname, td.scheduledate, co.compartment, em.nameId driver, em2.nameId dispatcher ");
+		sb.append("from itemterminalpickup itp, terminaldispatch td, compartment co, terminaldispatchdetail tdd, employee em, employee em2 ");
+		sb.append("where td.driverid = ");
 		sb.append(id);
 		sb.append(" ");
-		sb.append("and   it.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.compartmentid    = it.compartmentid ");
-		sb.append("and   co.compartmentid    = tk.compartmentid ");
-		sb.append("and   pi.driverid = em.id ");
-		sb.append("and   pi.disbatchid = em2.id ");
+		sb.append("and  tdd.terminaldispatchid = td.terminaldispatchid ");
+		sb.append("and   itp.terminaldispatchdetailid = tdd.terminaldispatchdetailid ");
+		sb.append("and    co.compartmentid    = tdd.compartmentid ");
+		sb.append("and   td.driverid = em.id ");
+		sb.append("and   td.disbatchid = em2.id ");
 		
-		 Itempickup[]  pd = getItempickupList(sb.toString());
-		 if (pd.length > 0)
-		 {
-			 json = asJSON(pd);
-		 }
-		 return json;
+		 Itemterminalpickup[]  pd = getItempickupList(sb.toString());
+		 if (pd != null && pd.length > 0)
+		    pList.setPickupList(pd);
+		 
+		 return pList;
 		
 	}
 	
-	public String getItempickupById(int id)
+	public Itemterminalpickup getItempickupById(int id)
 	{
-		String json ="";
+		Itemterminalpickup itemterminalpickup = null;
 		StringBuffer sb = new StringBuffer();
-		sb.append("select it.itemspickupid, it.pickupdispatchid, it.compartmentid, qtypickup, billoflading, "); 
-		sb.append("pickupdate, it.createddate itempickup_createddate, it.lastupdated, it.lastupdateduser, verifierid, verificationdate, ");
-		sb.append("tk.fuelname, tk.scheduledquantity, pi.createddate dispatch_createddate, pi.driverid, pi.disbatchid pi.terminalid, pi.truckname, pi.scheduledate, ");
-		sb.append("co.compartment, em.nameId driver, em2.nameId dispatcher ");
-		sb.append("from Itempickup it, pickupdispatch pi, compartment co, truckpickupschedule tk, employee em, employee em2 ");
-		sb.append("where it.itemspickupid = ");
+		
+		sb.append("select itp.itemterminalpickupid, itp.terminaldispatchdetailid, co.compartmentid, qtypickup, billoflading,  ");
+		sb.append("pickupdate, itp.createddate itempickup_createddate, itp.lastupdated, itp.lastupdateduser, verifierid, verificationdate, ");
+		sb.append("tdd.fuelname, tdd.scheduledquantity, td.createddate dispatch_createddate, td.driverid,  td.disbatchid, td.terminalid, ");
+		sb.append("td.truckname, td.scheduledate, co.compartment, em.nameId driver, em2.nameId dispatcher ");
+		sb.append("from itemterminalpickup itp, terminaldispatch td, compartment co, terminaldispatchdetail tdd, employee em, employee em2 ");
+		sb.append("where itp.itemterminalpickupid = ");
 		sb.append(id);
 		sb.append(" ");
-		sb.append("and   it.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.pickupdispatchid = pi.pickupdispatchId ");
-		sb.append("and   tk.compartmentid    = it.compartmentid ");
-		sb.append("and   co.compartmentid    = tk.compartmentid ");
-		sb.append("and   pi.driverid = em.id ");
-		sb.append("and   pi.disbatchid = em2.id ");
+		sb.append("and  tdd.terminaldispatchdetailid = itp.terminaldispatchdetailid ");
+		sb.append("and  td.terminaldispatchid = tdd.terminaldispatchid ");
+		sb.append("and  co.compartmentid    = tdd.compartmentid ");
+		sb.append("and   td.driverid = em.id ");
+		sb.append("and   td.disbatchid = em2.id ");
+		   
 		
-		 Itempickup[]  pd = getItempickupList(sb.toString());
-		 if (pd.length > 0)
+		 Itemterminalpickup[]  pd = getItempickupList(sb.toString());
+		 if (pd != null && pd.length > 0)
 		 {
-			 json = asJSON(pd);
+			 itemterminalpickup = pd[0];
 		 }
-		 return json;
+		 return itemterminalpickup;
 		
 	}
 	
-	private Itempickup[] getItempickupList(String sql)
+	private Itemterminalpickup[] getItempickupList(String sql)
 	{
 		Connection conn = null;
 		ResultSet rset = null;
 		Statement pstmt = null;
-		List<Itempickup> list = new ArrayList<Itempickup>();
-		ItempickupList dispList = new ItempickupList();
-		Itempickup[] dlist = null;
+		List<Itemterminalpickup> list = new ArrayList<Itemterminalpickup>();
+		ItemterminalpickupList dispList = new ItemterminalpickupList();
+		Itemterminalpickup[] dlist = null;
 		
 		try
 		{
@@ -282,7 +286,7 @@ public class SQLServices
 				
 				while (rset.next())
 				{
-					Itempickup pickup = new Itempickup();
+					Itemterminalpickup pickup = new Itemterminalpickup();
 					pickup.setBilloflading(rset.getString("billoflading"));
 					pickup.setCompartment(rset.getString("compartment"));
 					pickup.setCompartmentid(rset.getInt("compartmentid"));
@@ -290,13 +294,12 @@ public class SQLServices
 					pickup.setDriverid(rset.getInt("driverid")); 
 					pickup.setDisbatchid(rset.getInt("disbatchid"));
 					pickup.setFuelname(rset.getString("fuelname"));
-					pickup.setItemspickupid(rset.getInt("itemspickupid"));
+					pickup.setItemterminalpickupid(rset.getInt("itemterminalpickupid"));
 					pickup.setLastupdated(rset.getDate("lastupdated"));
 					pickup.setLastupdateduser(rset.getString("lastupdateduser"));
-					pickup.setNameId_dispatcher(rset.getString("dispatcher"));
-					pickup.setNameId_driver(rset.getString("driver"));
+					pickup.setDispatcher(rset.getString("dispatcher"));
+					pickup.setDriver(rset.getString("driver"));
 					pickup.setPickupdate(rset.getDate("pickupdate"));
-					pickup.setPickupdispatchid(rset.getInt("pickupdispatchid"));
 					pickup.setQtypickup(rset.getDouble("qtypickup"));
 					pickup.setDispatch_createddate(rset.getDate("dispatch_createddate"));
 					pickup.setScheduledate(rset.getDate("scheduledate"));
@@ -304,7 +307,7 @@ public class SQLServices
 					pickup.setTerminalid(rset.getString("terminalid"));
 					pickup.setTruckname(rset.getString("truckname"));
 					pickup.setVerificationdate(rset.getDate("verificationdate"));
-					pickup.setVerifierid(rset.getInt("verifierid"));
+					pickup.setVerifierid(rset.getBoolean("verifierid"));
 					
 					list.add(pickup);
 					
@@ -312,9 +315,9 @@ public class SQLServices
 				
 				if (list.size() > 0)
 				{
-					dlist = new Itempickup[list.size()];
+					dlist = new Itemterminalpickup[list.size()];
 					int count = 0;
-					for (Itempickup dis : list)
+					for (Itemterminalpickup dis : list)
 					{
 						dlist[count] = dis;
 						count++;

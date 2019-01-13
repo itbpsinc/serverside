@@ -2,10 +2,14 @@ package com.itbps.fuelmgt;
 
 import java.util.Date;
 
-public class Itempickup
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class Itemterminalpickup
 {
-	private int itemspickupid;
-	private int pickupdispatchid;
+	
+	private int itemterminalpickupid;
+	private int terminaldispatchdetailid;
 	private int compartmentid;
 	private double qtypickup;
 	private String billoflading;
@@ -13,72 +17,38 @@ public class Itempickup
 	private Date itempickup_createddate;
 	private Date lastupdated;
 	private String lastupdateduser;
-	private int verifierid;
+	private boolean verifierid;
 	private Date verificationdate;
 	private String fuelname;
 	private double scheduledquantity;
 	private Date dispatch_createddate;
-	private int  driverid;
-	private int  disbatchid;
+	private int driverid;
+	private int disbatchid;
 	private String terminalid;
 	private String truckname;
 	private Date scheduledate;
 	private String compartment;
-	private String nameId_driver;
-	private String nameId_dispatcher;
+	private String driver;
+	private String dispatcher;
 	
-	
-	
-	
-	
-	public Date getItempickup_createddate()
+	public int getItemterminalpickupid()
 	{
-		return itempickup_createddate;
-	}
-
-	public void setItempickup_createddate(Date itempickup_createddate)
-	{
-		this.itempickup_createddate = itempickup_createddate;
-	}
-
-	public Date getDispatch_createddate()
-	{
-		return dispatch_createddate;
-	}
-
-	public void setDispatch_createddate(Date dispatch_createddate)
-	{
-		this.dispatch_createddate = dispatch_createddate;
-	}
-
-	public int getDisbatchid()
-	{
-		return disbatchid;
-	}
-
-	public void setDisbatchid(int disbatchid)
-	{
-		this.disbatchid = disbatchid;
-	}
-
-	public int getItemspickupid()
-	{
-		return itemspickupid;
+		return itemterminalpickupid;
 	}
 	
-	public void setItemspickupid(int itemspickupid)
+	public void setItemterminalpickupid(int itemterminalpickupid)
 	{
-		this.itemspickupid = itemspickupid;
+		this.itemterminalpickupid = itemterminalpickupid;
 	}
 	
-	public int getPickupdispatchid()
+	public int getTerminaldispatchdetailid()
 	{
-		return pickupdispatchid;
+		return terminaldispatchdetailid;
 	}
 	
-	public void setPickupdispatchid(int pickupdispatchid)
+	public void setTerminaldispatchdetailid(int terminaldispatchdetailid)
 	{
-		this.pickupdispatchid = pickupdispatchid;
+		this.terminaldispatchdetailid = terminaldispatchdetailid;
 	}
 	
 	public int getCompartmentid()
@@ -121,6 +91,15 @@ public class Itempickup
 		this.pickupdate = pickupdate;
 	}
 	
+	public Date getItempickup_createddate()
+	{
+		return itempickup_createddate;
+	}
+	
+	public void setItempickup_createddate(Date itempickup_createddate)
+	{
+		this.itempickup_createddate = itempickup_createddate;
+	}
 	
 	public Date getLastupdated()
 	{
@@ -142,12 +121,12 @@ public class Itempickup
 		this.lastupdateduser = lastupdateduser;
 	}
 	
-	public int getVerifierid()
+	public boolean isVerifierid()
 	{
 		return verifierid;
 	}
 	
-	public void setVerifierid(int verifierid)
+	public void setVerifierid(boolean verifierid)
 	{
 		this.verifierid = verifierid;
 	}
@@ -182,7 +161,15 @@ public class Itempickup
 		this.scheduledquantity = scheduledquantity;
 	}
 	
+	public Date getDispatch_createddate()
+	{
+		return dispatch_createddate;
+	}
 	
+	public void setDispatch_createddate(Date dispatch_createddate)
+	{
+		this.dispatch_createddate = dispatch_createddate;
+	}
 	
 	public int getDriverid()
 	{
@@ -192,6 +179,16 @@ public class Itempickup
 	public void setDriverid(int driverid)
 	{
 		this.driverid = driverid;
+	}
+	
+	public int getDisbatchid()
+	{
+		return disbatchid;
+	}
+	
+	public void setDisbatchid(int disbatchid)
+	{
+		this.disbatchid = disbatchid;
 	}
 	
 	public String getTerminalid()
@@ -234,24 +231,24 @@ public class Itempickup
 		this.compartment = compartment;
 	}
 	
-	public String getNameId_driver()
+	public String getDriver()
 	{
-		return nameId_driver;
+		return driver;
 	}
 	
-	public void setNameId_driver(String nameId_driver)
+	public void setDriver(String driver)
 	{
-		this.nameId_driver = nameId_driver;
+		this.driver = driver;
 	}
 	
-	public String getNameId_dispatcher()
+	public String getDispatcher()
 	{
-		return nameId_dispatcher;
+		return dispatcher;
 	}
 	
-	public void setNameId_dispatcher(String nameId_dispatcher)
+	public void setDispatcher(String dispatcher)
 	{
-		this.nameId_dispatcher = nameId_dispatcher;
+		this.dispatcher = dispatcher;
 	}
 	
 }
