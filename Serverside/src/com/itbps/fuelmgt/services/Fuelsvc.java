@@ -80,7 +80,7 @@ public class Fuelsvc extends HttpServlet
 
 		String token = authorizationHeader.substring(IUtils.AUTHENTICATION_SCHEME.length());
 
-		if ( IUtils.isValidToken(token))
+		if ( IUtils.isValidToken(token) != null)
 		{
 			
 			//Perform request

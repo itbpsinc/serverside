@@ -25,6 +25,7 @@ import com.itbps.fuelmgt.Itemterminalpickup;
 import com.itbps.fuelmgt.ItemterminalpickupList;
 import com.itbps.fuelmgt.TruckSchedule;
 import com.itbps.fuelmgt.TruckScheduleList;
+import com.itbps.user.security.UserSecurity;
 import com.itbps.utils.GSONCreator;
 import com.itbps.utils.IUtils;
 
@@ -1316,6 +1317,85 @@ public class SQLServices
 		return employee;
 		
 	}
+	
+	public static UserSecurity getUserForSecurity(String id)
+	{
+		logger.info("getEmployee(int); Started....");
+		
+		String sql = "SELECT * FROM apexpms_apex.employee WHERE nameid= ?";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		UserSecurity employee = null;
+		
+		try
+		{
+			conn = getConnection();
+			
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, id);
+				
+				rset = pstmt.executeQuery();
+				if (rset.next())
+				{
+					employee = new UserSecurity();
+					employee.setId(rset.getInt("id"));
+					employee.setPassword(rset.getString("password"));
+					employee.setUserId(rset.getString("nameId"));
+					
+					employee.setRole(getEmployeeRole(employee.getUserId()));
+				}
+			}
+			logger.info("getEmployee(int); Completed....");
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			
+		}
+		
+		return employee;
+		
+	}
+	
 	
 	public Employee getEmployee(String loginid)
 	{

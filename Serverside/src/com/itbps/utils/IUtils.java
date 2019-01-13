@@ -99,10 +99,10 @@ public class IUtils
 
 	}
 
-	public static  boolean isValidToken(String jwt) throws Exception
+	public static  String isValidToken(String jwt) 
 	{
 
-		// This line will throw an exception if it is not a signed JWS (as expected)
+		String userid = null;
 		try
 		{
 		   byte[] secret = SECRET.getBytes();
@@ -110,13 +110,16 @@ public class IUtils
 		   Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(realsecret)).parseClaimsJws(jwt)
 				.getBody();
 		   if (claims != null)
-			   return true;
+		   {
+			   userid =  (String)claims.get("loginid");
+			   return userid;
+		   }
 		}
 		catch(Exception _exx)
 		{
-			return false;
+			return null;
 		}
-		return false;
+		return null;
 	}
 
 	public static boolean isTokenBasedAuthentication(String authorizationHeader)
