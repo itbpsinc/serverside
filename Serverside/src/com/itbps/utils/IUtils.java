@@ -9,7 +9,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.itbps.fuelmgt.Authval;
+import com.itbps.user.security.UserSecurity;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
@@ -153,7 +158,19 @@ public class IUtils
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		UserSecurity sec = new UserSecurity();
+		sec.setFirstName("Onyekachi");
+		sec.setLastName("Anyanwu");
+		sec.setId(12);
+		sec.setPassword("Wordpass");
+		sec.setRole("user");
+		sec.setUserId("Austin");
+		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+		JsonParser parser = new JsonParser();
+		JsonElement je = parser.parse(gson.toJson(sec));
+		
+		String json = gson.toJson(je);
+		System.out.println(json);
 
 	}
 

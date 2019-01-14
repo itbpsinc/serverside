@@ -10,6 +10,7 @@ import javax.annotation.Priority;
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ResourceInfo;
@@ -34,7 +35,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 {
 	
 	public static final String HEADER_PROPERTY_ID = "id";
-	public static final String AUTHORIZATION_PROPERTY = "x-access-token";
+	public static final String AUTHORIZATION_PROPERTY = "token";
 	
 	// Do not use static responses, rebuild reponses every time
 	private static final String ACCESS_REFRESH = "Token expired. Please authenticate again!";
@@ -44,9 +45,8 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 	
 	final static Logger logger = LogManager.getLogger(AuthenticationFilter.class);
 	
-	@Context
-	private ResourceInfo resourceInfo;
-	
+	@Context private ResourceInfo resourceInfo;
+	@Context private HttpServletRequest webRequest;
 	@Override
 	public void filter(ContainerRequestContext requestContext)
 	{

@@ -20,7 +20,6 @@
     <!-- Map all the URLs to the Jersey ServletContainer -->
     <servlet-mapping>
     <servlet-name>ITBPS Service</servlet-name>
-    <url-pattern>/rest
-    /*</url-pattern>
+    <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
 </web-app>

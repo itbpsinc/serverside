@@ -1006,6 +1006,78 @@ public class SQLServices
 		
 	}
 	
+	public UserSecurity createEmployee(UserSecurity emp)
+	{
+		logger.info("addEmployee Started...");
+		String sql = "INSERT INTO apexpms_apex.employee (nameId, firstname, lastname, password) VALUES (?, ?, ?, ?)";
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		Employee rtnEmp = null;
+		UserSecurity  newsec = null;
+		try
+		{
+			conn = getConnection();
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, emp.getUserId());
+				pstmt.setString(2, emp.getFirstName());
+				pstmt.setString(3, emp.getLastName());
+				pstmt.setString(4, emp.getPassword());
+				//pstmt.setString(5, emp.getToken() );
+				//
+				int id = pstmt.executeUpdate();
+				rtnEmp = getEmployee(emp.getUserId());
+				newsec = new UserSecurity();
+				newsec.setFirstName(rtnEmp.getFirstName());
+				newsec.setLastName(rtnEmp.getLastName());
+				newsec.setId(rtnEmp.getId());
+				newsec.setRole(rtnEmp.getRole());
+				newsec.setPassword(rtnEmp.getPassword());
+				newsec.setUserId(rtnEmp.getNameid());
+				
+				logger.info("addEmployee Processing completed....");
+				
+			}
+		}
+		
+		catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			return null;
+			
+		} finally
+		{
+			
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			
+		}
+		
+		return newsec;
+	}
+	
 	public Employee addEmployee(Employee emp)
 	{
 		logger.info("addEmployee Started...");
