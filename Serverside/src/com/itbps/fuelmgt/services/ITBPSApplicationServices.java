@@ -22,9 +22,11 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
+import com.google.gson.JsonParser;
 import com.itbps.exception.UserExistingException;
 import com.itbps.exception.UserNotFoundException;
 import com.itbps.fuelmgt.Authval;
+import com.itbps.fuelmgt.EmployeeList;
 import com.itbps.fuelmgt.ItemterminalpickupList;
 import com.itbps.fuelmgt.sql.SQLServices;
 import com.itbps.jersey.Todo;
@@ -37,10 +39,11 @@ import com.itbps.user.security.PasswordSecurity;
 import com.itbps.user.security.UserSecurity;
 import com.itbps.utils.IUtils;
 
-@DeclareRoles({"admin", "user", "guest","driver","dispatcher","accountant"})
+@DeclareRoles({"Admin", "user", "guest","driver","dispatcher","accountant"})
 @Path("/itbps")
 public class ITBPSApplicationServices extends  ResourceConfig 
 {
+	
 	@Context private HttpServletRequest webRequest;
 	
 	public ITBPSApplicationServices() {
@@ -115,10 +118,13 @@ public class ITBPSApplicationServices extends  ResourceConfig
 
 			// generate a token for the user
 			Authval val = new Authval();
-			val.setId(userSecurity.getId()+"");
+			val.setExpiration(600000);
+			val.setId("JWT-09");
+		//	val.setId(String.valueOf(userSecurity.getId()));
 			val.setIssue("ITBPS INC");
-			val.setLoginid(credentials.getUserid());
-			val.setName(credentials.getUserid());
+			val.setLoginid(userSecurity.getUserId());
+			val.setName(userSecurity.getUserId());
+			val.setRole(userSecurity.getRole());
 			
 			
 			String token = IUtils.createJWT(val);
@@ -130,7 +136,7 @@ public class ITBPSApplicationServices extends  ResourceConfig
 			webRequest.getSession(true).setAttribute("token", token);
 			
 			Map<String,Object> map = new HashMap<String,Object>();
-			map.put( AuthenticationFilter.AUTHORIZATION_PROPERTY, token );
+			map.put( AuthenticationFilter.TOKEN_PROPERTY.trim(), token );
 			
 			// Return the token on the response
 			return ResponseBuilder.createResponse( Response.Status.OK, map );
@@ -140,6 +146,26 @@ public class ITBPSApplicationServices extends  ResourceConfig
 		}
 		catch( Exception e ) {
 			return ResponseBuilder.createResponse( Response.Status.UNAUTHORIZED );
+		}
+		
+	}
+	
+	@GET
+	@Path("/employeeList")
+	@PermitAll
+	
+	@Produces("application/json")
+	public Response employeeList()
+	{
+		//@RolesAllowed({ "Admin" })
+		try
+		{
+		   EmployeeList  empList = new SQLServices().getEmployees();
+		   return ResponseBuilder.createResponse(Response.Status.OK, empList);
+		   
+		}
+		catch( Exception e ) {
+			return ResponseBuilder.createResponse( Response.Status.NOT_FOUND, e.getMessage() );
 		}
 		
 	}

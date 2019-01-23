@@ -35,7 +35,8 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 {
 	
 	public static final String HEADER_PROPERTY_ID = "id";
-	public static final String AUTHORIZATION_PROPERTY = "token";
+	public static final String TOKEN_PROPERTY = "token";
+	public static final String AUTHORIZATION_PROPERTY = "Authorization";
 	
 	// Do not use static responses, rebuild reponses every time
 	private static final String ACCESS_REFRESH = "Token expired. Please authenticate again!";
@@ -74,7 +75,7 @@ public class AuthenticationFilter implements javax.ws.rs.container.ContainerRequ
 			
 			String id = null;
 			String jwt = authProperty.get(0);
-			
+			jwt = jwt.substring(IUtils.AUTHENTICATION_SCHEME.length());
 			// try to decode the jwt - deny access if no valid token provided
 			id = IUtils.isValidToken(jwt);
 			

@@ -2,6 +2,8 @@ package com.itbps.fuelmgt;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlRootElement;
+@XmlRootElement
 public class Employee
 {
 	private int id;

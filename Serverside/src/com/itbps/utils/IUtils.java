@@ -26,7 +26,7 @@ public class IUtils
 {
 	
 	private static final String REALM = "com.itbps";
-	public static final String AUTHENTICATION_SCHEME = "ITBPSINC";
+	public static final String AUTHENTICATION_SCHEME = "ITBPSINC ";
 	private static final String SECRET = "ITBPSINC Woodbridge VA 22193";
 	
 	public static String createJWT(Authval auth) throws Exception
@@ -43,8 +43,7 @@ public class IUtils
 
 		long nowMillis = System.currentTimeMillis();
 		Date now = new Date(nowMillis);
-		byte[] secret = SECRET.getBytes();
-		String realsecret = secret + "";
+		String realsecret =IUtils.SECRET;
 
 		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(realsecret);
 
@@ -57,14 +56,20 @@ public class IUtils
 		claims.setIssuedAt(new Date());
 
 		long expir = System.currentTimeMillis() + auth.getExpiration();
-		;
+		
 
 		claims.setExpiration(new Date(expir));
+		
+		JwtBuilder builder = Jwts.builder().setHeader(headers).setHeaderParam("ITBPS", "Authorization").setClaims(claims).signWith(SignatureAlgorithm.HS256, apiKeySecretBytes);
 
-		JwtBuilder builder = Jwts.builder().setHeader(headers).setClaims(claims).signWith(SignatureAlgorithm.HS256, apiKeySecretBytes);
-
+		if (auth.getExpiration() >= 0)
+		{
+			long expMillis = nowMillis + auth.getExpiration();
+			Date exp = new Date(expMillis);
+			builder.setExpiration(exp);
+		}
 		// Builds the JWT and serializes it to a compact, URL-safe string
-		return builder.compact();
+		return  runQuickVal(builder.compact());
 
 	}
 	
@@ -83,8 +88,7 @@ public class IUtils
 		// The JWT signature algorithm we will be using to sign the token
 		long nowMillis = System.currentTimeMillis();
 		Date now = new Date(nowMillis);
-		byte[] secret = SECRET.getBytes();
-		String realsecret = secret + "";
+		String realsecret =IUtils.SECRET;;
 
 		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(realsecret);
 
@@ -92,16 +96,38 @@ public class IUtils
 		JwtBuilder builder = Jwts.builder().setId(id).setIssuedAt(now).setIssuer(issuer).setAudience(payload)
 				.signWith(SignatureAlgorithm.HS256, apiKeySecretBytes);
 		// if it has been specified, let's add the expiration
+		
 		if (ttlMillis >= 0)
 		{
 			long expMillis = nowMillis + ttlMillis;
 			Date exp = new Date(expMillis);
-			builder.setExpiration(exp);
+			//builder.setExpiration(exp);
 		}
 
 		// Builds the JWT and serializes it to a compact, URL-safe string
-		return builder.compact();
+		return  runQuickVal(builder.compact());
 
+	}
+	
+	public static  String runQuickVal(String jwt) 
+	{
+
+		String userid = null;
+		try
+		{
+		   String realsecret =IUtils.SECRET;
+		   Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(realsecret)).parseClaimsJws(jwt)
+				.getBody();
+		   if (claims != null)
+		   {
+			   return jwt;
+		   }
+		}
+		catch(Exception _exx)
+		{
+			return null;
+		}
+		return jwt;
 	}
 
 	public static  String isValidToken(String jwt) 
@@ -110,8 +136,7 @@ public class IUtils
 		String userid = null;
 		try
 		{
-		   byte[] secret = SECRET.getBytes();
-		   String realsecret = secret + "";
+		   String realsecret =IUtils.SECRET;
 		   Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(realsecret)).parseClaimsJws(jwt)
 				.getBody();
 		   if (claims != null)
@@ -134,7 +159,7 @@ public class IUtils
 		// It must not be null and must be prefixed with "Bearer" plus a whitespace
 		// The authentication scheme comparison must be case-insensitive
 		return authorizationHeader != null
-				&& authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
+				&& authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase());
 	}
 
 	public static void abortWithUnauthorized(HttpServletRequest request)
