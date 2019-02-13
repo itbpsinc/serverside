@@ -26,6 +26,7 @@ import com.itbps.fuelmgt.Itemterminalpickup;
 import com.itbps.fuelmgt.ItemterminalpickupList;
 import com.itbps.fuelmgt.TruckSchedule;
 import com.itbps.fuelmgt.TruckScheduleList;
+import com.itbps.user.security.PasswordSecurity;
 import com.itbps.user.security.UserSecurity;
 import com.itbps.utils.GSONCreator;
 import com.itbps.utils.IUtils;
@@ -1018,6 +1019,7 @@ public class SQLServices
 		PreparedStatement pstmt = null;
 		Employee rtnEmp = null;
 		UserSecurity newsec = null;
+		
 		try
 		{
 			conn = getConnection();
@@ -1081,7 +1083,7 @@ public class SQLServices
 		return newsec;
 	}
 	
-	public Employee addEmployee(Employee emp)
+	public Employee addEmployee(Employee emp) throws Exception
 	{
 		logger.info("addEmployee Started...");
 		String sql = "INSERT INTO apexpms_apex.employee (nameId, firstname, lastname, password, address1, address2, city, state, zipcode, dateofhire, ssn) VALUES (?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?)";
@@ -1092,6 +1094,10 @@ public class SQLServices
 		
 		try
 		{
+			if (emp.getPassword() == null || emp.getPassword().trim().length() == 0)
+				 throw  new Exception("Password may not be null");
+			emp.setPassword(PasswordSecurity.generateHash(emp.getPassword()));
+			
 			conn = getConnection();
 			if (conn != null)
 			{
@@ -1120,7 +1126,7 @@ public class SQLServices
 		catch(Exception _exx)
 		{
 			logger.error(IUtils.getPrintTrace(_exx));
-			return null;
+			throw _exx;
 			
 		} finally
 		{
@@ -1211,10 +1217,10 @@ public class SQLServices
 		return result;
 	}
 	
-	public Employee updateEmployee(Employee emp)
+	public Employee updateEmployee(Employee emp) throws Exception
 	{
 		logger.info("updateEmployee Started...");
-		String sql = "UPDATE apexpms_apex.employee SET firstName=?, lastName=?, password=?, address1=?, address2=?, city=?, state=?, zipcode=?, dateofhire=? WHERE  id=?";
+		String sql = "UPDATE apexpms_apex.employee SET firstName=?, lastName=?, address1=?, address2=?, city=?, state=?, zipcode=?, dateofhire=?, ssn=? WHERE  id=?";
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -1229,20 +1235,19 @@ public class SQLServices
 				
 				pstmt.setString(1, emp.getFirstName());
 				pstmt.setString(2, emp.getLastName());
-				pstmt.setString(3, emp.getPassword());
-				pstmt.setString(4, emp.getAddress1());
-				pstmt.setString(5, emp.getAddress2());
-				pstmt.setString(6, emp.getCity());
-				pstmt.setString(7, emp.getState());
-				pstmt.setString(8, emp.getZipcode());
-				if (emp.getDateofhire() != null) pstmt.setDate(9, new java.sql.Date(emp.getDateofhire().getTime()));
-				else pstmt.setDate(9, null);
+				pstmt.setString(3, emp.getAddress1());
+				pstmt.setString(4, emp.getAddress2());
+				pstmt.setString(5, emp.getCity());
+				pstmt.setString(6, emp.getState());
+				pstmt.setString(7, emp.getZipcode());
+				if (emp.getDateofhire() != null) pstmt.setDate(8, new java.sql.Date(emp.getDateofhire().getTime()));
+				else pstmt.setDate(8, null);
 				
-				pstmt.setString(10, emp.getSsn());
-				pstmt.setInt(11, emp.getId());
+				pstmt.setString(9, emp.getSsn());
+				pstmt.setInt(10, emp.getId());
 				
 				int id = pstmt.executeUpdate();
-				rtnEmp = getEmployee(id);
+				rtnEmp = getEmployee(emp.getId());
 				logger.info("updateEmployee Processing completed....");
 				
 			}
@@ -1252,7 +1257,7 @@ public class SQLServices
 		catch(Exception _exx)
 		{
 			logger.error(IUtils.getPrintTrace(_exx));
-			return null;
+			throw _exx;
 			
 		} finally
 		{
@@ -1341,6 +1346,8 @@ public class SQLServices
 					employee.setFirstName(rset.getString("firstname"));
 					employee.setLastName(rset.getString("lastname"));
 					employee.setPassword(rset.getString("password"));
+					employee.setZipcode(rset.getString("zipcode"));
+					
 					try
 					{
 					   employee.setDateofhire(rset.getDate("dateofhire"));

@@ -101,7 +101,7 @@ public class IUtils
 		{
 			long expMillis = nowMillis + ttlMillis;
 			Date exp = new Date(expMillis);
-			//builder.setExpiration(exp);
+			builder.setExpiration(exp);
 		}
 
 		// Builds the JWT and serializes it to a compact, URL-safe string

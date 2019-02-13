@@ -26,6 +26,7 @@ import com.google.gson.JsonParser;
 import com.itbps.exception.UserExistingException;
 import com.itbps.exception.UserNotFoundException;
 import com.itbps.fuelmgt.Authval;
+import com.itbps.fuelmgt.Employee;
 import com.itbps.fuelmgt.EmployeeList;
 import com.itbps.fuelmgt.ItemterminalpickupList;
 import com.itbps.fuelmgt.sql.SQLServices;
@@ -165,6 +166,33 @@ public class ITBPSApplicationServices extends  ResourceConfig
 		   
 		}
 		catch( Exception e ) {
+			return ResponseBuilder.createResponse( Response.Status.NOT_FOUND, e.getMessage() );
+		}
+		
+	}
+	
+	@POST
+	@Path("/adddEmployee")
+	@RolesAllowed({ "Admin" })
+	
+	
+	@Produces("application/json")
+	public Response createEmployee(Employee employee)
+	{
+		//@RolesAllowed({ "Admin" })
+		Employee  emp = null;
+		try
+		{
+		   if (employee.getId() <= 0)
+		      emp = new SQLServices().addEmployee(employee);
+		   else
+			  emp = new SQLServices().updateEmployee(employee);
+		   
+		   return ResponseBuilder.createResponse(Response.Status.OK, emp);
+		   
+		}
+		catch( Exception e ) 
+		{
 			return ResponseBuilder.createResponse( Response.Status.NOT_FOUND, e.getMessage() );
 		}
 		
