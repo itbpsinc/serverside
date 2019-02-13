@@ -19,6 +19,7 @@ public class Dispatch
 	public TruckSchedule[] getTruckSchedule()
 	{
 		return truckSchedule;
+		
 	}
 	
 	public void setTruckSchedule(TruckSchedule[] truckSchedule)
