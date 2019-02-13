@@ -13,6 +13,8 @@ public class DispatchList
 	public void setDispatchList(Dispatch[] dispatchList)
 	{
 		this.dispatchList = dispatchList;
+		
+		
 	}
 	
 }
