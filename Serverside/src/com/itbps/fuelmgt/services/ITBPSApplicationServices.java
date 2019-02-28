@@ -188,6 +188,7 @@ public class ITBPSApplicationServices extends  ResourceConfig
 		   else
 			  emp = new SQLServices().updateEmployee(employee);
 		   
+		   emp.setPassword(null);
 		   return ResponseBuilder.createResponse(Response.Status.OK, emp);
 		   
 		}

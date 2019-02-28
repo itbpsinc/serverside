@@ -61,7 +61,7 @@ public class ResponseBuilder {
 		
 		JSONObject jobj2 = new JSONObject();
 		jobj2.put("data", jobj.get(key));
-		System.out.println(jobj2.toString());
+
 		
 		return Response.status(status).entity(jobj2.toString()).build();
 	}

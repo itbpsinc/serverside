@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +40,7 @@ public class SQLServices
 {
 	private static final Logger logger = LogManager.getLogger(SQLServices.class.getName());
 	final JsonParser parser = new JsonParser();
+	private static SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public static Connection getConnection() throws Exception
 	{
@@ -1111,8 +1113,11 @@ public class SQLServices
 				pstmt.setString(7, emp.getCity());
 				pstmt.setString(8, emp.getState());
 				pstmt.setString(9, emp.getZipcode());
-				if (emp.getDateofhire() != null) pstmt.setDate(10, new java.sql.Date(emp.getDateofhire().getTime()));
-				else pstmt.setDate(10, null);
+				if (emp.getDateofhire() != null) 
+				{
+					pstmt.setDate(10,  java.sql.Date.valueOf( emp.getDateofhire()));
+				}
+				   else pstmt.setDate(10, null);
 				
 				pstmt.setString(11, emp.getSsn());
 				
@@ -1220,7 +1225,7 @@ public class SQLServices
 	public Employee updateEmployee(Employee emp) throws Exception
 	{
 		logger.info("updateEmployee Started...");
-		String sql = "UPDATE apexpms_apex.employee SET firstName=?, lastName=?, address1=?, address2=?, city=?, state=?, zipcode=?, dateofhire=?, ssn=? WHERE  id=?";
+		String sql = "UPDATE apexpms_apex.employee SET firstName=?, lastName=?, address1=?, address2=?, city=?, state=?, zipcode=?, dateofhire=?, ssn=?, active=?  WHERE  id=?";
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -1240,13 +1245,20 @@ public class SQLServices
 				pstmt.setString(5, emp.getCity());
 				pstmt.setString(6, emp.getState());
 				pstmt.setString(7, emp.getZipcode());
-				if (emp.getDateofhire() != null) pstmt.setDate(8, new java.sql.Date(emp.getDateofhire().getTime()));
+				if (emp.getDateofhire() != null) pstmt.setDate(8, java.sql.Date.valueOf(emp.getDateofhire()));
 				else pstmt.setDate(8, null);
 				
 				pstmt.setString(9, emp.getSsn());
-				pstmt.setInt(10, emp.getId());
+				pstmt.setInt(10, emp.isActive() ? 1:0);
+				pstmt.setInt(11, emp.getId());
 				
-				int id = pstmt.executeUpdate();
+				
+				pstmt.executeUpdate();
+				if (getEmployeeRole(emp.getNameid()) == null && emp.getRole() != null)
+				
+					addEmployeeRole(emp.getNameid(), emp.getRole());
+				else if (getEmployeeRole(emp.getNameid()) != null && emp.getRole() != null)
+					setEmployeeRole(emp.getNameid(), emp.getRole());
 				rtnEmp = getEmployee(emp.getId());
 				logger.info("updateEmployee Processing completed....");
 				
@@ -1350,7 +1362,8 @@ public class SQLServices
 					
 					try
 					{
-					   employee.setDateofhire(rset.getDate("dateofhire"));
+					if (rset.getDate("dateofhire") != null )
+					   employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
 					}
 					catch(Exception _exx)
 					{
@@ -1454,7 +1467,8 @@ public class SQLServices
 					employee.setFirstName(rset.getString("firstname"));
 					employee.setLastName(rset.getString("lastname"));
 					employee.setPassword(rset.getString("password"));
-					employee.setDateofhire(rset.getDate("dateofhire"));
+					if (rset.getDate("dateofhire") != null)
+					employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
 					employee.setState(rset.getString("state"));
 					employee.setSsn(rset.getString("ssn"));
 					employee.setActive(rset.getBoolean("active"));
@@ -1617,7 +1631,9 @@ public class SQLServices
 					employee.setFirstName(rset.getString("firstname"));
 					employee.setLastName(rset.getString("lastname"));
 					employee.setPassword(rset.getString("password"));
-					employee.setDateofhire(rset.getDate("dateofhire"));
+					
+					if (rset.getDate("dateofhire") != null)
+					employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
 					employee.setState(rset.getString("state"));
 					employee.setSsn(rset.getString("ssn"));
 					employee.setActive(rset.getBoolean("active"));
@@ -1737,6 +1753,142 @@ public class SQLServices
 		return null;
 		
 	}
+	
+	private static String addEmployeeRole(String loginid, String role)
+	{
+		String sql = "INSERT INTO userrole (nameid, role) VALUES (?, ?);";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		Employee employee = null;
+		
+		try
+		{
+			conn = getConnection();
+			
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, loginid);
+				pstmt.setString(2, role);
+				boolean rec = pstmt.execute();
+				
+			}
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			
+		}
+		
+		return loginid;
+		
+	}
+
+	
+	private static String setEmployeeRole(String loginid, String role)
+	{
+		String sql = "UPDATE userrole SET role= ? WHERE  nameid=?";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		Employee employee = null;
+		
+		try
+		{
+			conn = getConnection();
+			
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, role);
+				pstmt.setString(2, loginid);
+				boolean rec = pstmt.execute();
+				
+			}
+		} catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		} finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			
+		}
+		
+		return loginid;
+		
+	}
+	
 	
 	public static void main(String[] args)
 	{

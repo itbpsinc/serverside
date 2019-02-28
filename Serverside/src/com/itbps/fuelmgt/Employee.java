@@ -15,7 +15,7 @@ public class Employee
 	private String city;
 	private String state;
 	private String zipcode;
-	private Date dateofhire;
+	private String dateofhire;
 	private String ssn;
 	private String password;
 	private String role;
@@ -144,12 +144,12 @@ public class Employee
 		this.lastName = lastName;
 	}
 	
-	public Date getDateofhire()
+	public String getDateofhire()
 	{
 		return dateofhire;
 	}
 	
-	public void setDateofhire(Date dateofhire)
+	public void setDateofhire(String dateofhire)
 	{
 		this.dateofhire = dateofhire;
 	}
