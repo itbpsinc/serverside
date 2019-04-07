@@ -20,11 +20,17 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.itbps.fuelmgt.Dispatch;
 import com.itbps.fuelmgt.DispatchList;
+import com.itbps.fuelmgt.Driver;
+import com.itbps.fuelmgt.DriverList;
 import com.itbps.fuelmgt.Employee;
 import com.itbps.fuelmgt.EmployeeList;
+import com.itbps.fuelmgt.Fueltype;
+import com.itbps.fuelmgt.FueltypeList;
 import com.itbps.fuelmgt.Itemterminalpickup;
 import com.itbps.fuelmgt.Itemterminalpickup;
 import com.itbps.fuelmgt.ItemterminalpickupList;
+import com.itbps.fuelmgt.Terminal;
+import com.itbps.fuelmgt.TerminalList;
 import com.itbps.fuelmgt.TruckSchedule;
 import com.itbps.fuelmgt.TruckScheduleList;
 import com.itbps.user.security.PasswordSecurity;
@@ -1096,8 +1102,7 @@ public class SQLServices
 		
 		try
 		{
-			if (emp.getPassword() == null || emp.getPassword().trim().length() == 0)
-				 throw  new Exception("Password may not be null");
+			if (emp.getPassword() == null || emp.getPassword().trim().length() == 0) throw new Exception("Password may not be null");
 			emp.setPassword(PasswordSecurity.generateHash(emp.getPassword()));
 			
 			conn = getConnection();
@@ -1113,11 +1118,10 @@ public class SQLServices
 				pstmt.setString(7, emp.getCity());
 				pstmt.setString(8, emp.getState());
 				pstmt.setString(9, emp.getZipcode());
-				if (emp.getDateofhire() != null) 
+				if (emp.getDateofhire() != null)
 				{
-					pstmt.setDate(10,  java.sql.Date.valueOf( emp.getDateofhire()));
-				}
-				   else pstmt.setDate(10, null);
+					pstmt.setDate(10, java.sql.Date.valueOf(emp.getDateofhire()));
+				} else pstmt.setDate(10, null);
 				
 				pstmt.setString(11, emp.getSsn());
 				
@@ -1249,16 +1253,14 @@ public class SQLServices
 				else pstmt.setDate(8, null);
 				
 				pstmt.setString(9, emp.getSsn());
-				pstmt.setInt(10, emp.isActive() ? 1:0);
+				pstmt.setInt(10, emp.isActive() ? 1 : 0);
 				pstmt.setInt(11, emp.getId());
-				
 				
 				pstmt.executeUpdate();
 				if (getEmployeeRole(emp.getNameid()) == null && emp.getRole() != null)
-				
+					
 					addEmployeeRole(emp.getNameid(), emp.getRole());
-				else if (getEmployeeRole(emp.getNameid()) != null && emp.getRole() != null)
-					setEmployeeRole(emp.getNameid(), emp.getRole());
+				else if (getEmployeeRole(emp.getNameid()) != null && emp.getRole() != null) setEmployeeRole(emp.getNameid(), emp.getRole());
 				rtnEmp = getEmployee(emp.getId());
 				logger.info("updateEmployee Processing completed....");
 				
@@ -1324,6 +1326,299 @@ public class SQLServices
 		
 	}
 	
+	public DriverList getDrivers()
+	{
+		logger.info("getDrivers()");
+		String sql = "select d.driverid, d.licenseno, d.licensestate, d.licenseexpirationdate, emp.firstname, emp.lastname, emp.nameid  from driver d, employee emp \r\n" + 
+				"where emp.id = d.driverid";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		Driver driver   = null;
+		Driver[] dList  = null;
+		
+		List<Driver>list = new ArrayList<Driver>();
+		DriverList empls = new DriverList();
+		
+		try
+		{
+			conn = getConnection();
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+			    rset = pstmt.executeQuery();
+			    while (rset.next())
+				{
+			    	driver = new Driver();
+			    	driver.setDriverid(rset.getInt("driverid"));
+			    	driver.setFirstname(rset.getString("firstname"));
+			    	driver.setLastname(rset.getString("lastname"));
+			    	driver.setNameid(rset.getString("nameid"));
+			    	try
+					{
+					if (rset.getDate("licenseexpirationdate") != null )
+					   driver.setLicenseexpirationdate(simpleDate.format(rset.getDate("licenseexpirationdate")));
+					}
+					catch(Exception _exx)
+					{
+						//
+					}
+			    	driver.setLicenseno(rset.getString("licenseno"));
+			    	driver.setLicensestate(rset.getString("licensestate"));
+			    	
+			    	list.add(driver);
+				}
+			    
+			    if (list.size() > 0)
+				{
+					dList = new Driver[list.size()];
+					int count = 0;
+					for (Driver drv : list)
+					{
+						dList[count] = drv;
+						count++;
+					}
+					empls.setDrivers(dList);
+				}
+			    
+				
+			}
+			
+		}
+		 catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		} 
+		finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+		}
+			
+		return empls;
+		
+		
+	}
+	
+	
+	public FueltypeList getFueltypes()
+	{
+		logger.info("getFueltypes()");
+		String sql = "select fueldescription, fuelname from fueltype";
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		Fueltype fueltype   = null;
+		Fueltype[] fList  = null;
+		
+		List<Fueltype>list = new ArrayList<Fueltype>();
+		FueltypeList fuels = new FueltypeList();
+		
+		try
+		{
+			conn = getConnection();
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+			    rset = pstmt.executeQuery();
+			    while (rset.next())
+				{
+			    	fueltype = new Fueltype();
+			    	fueltype.setFuelname(rset.getString("fuelname"));
+			    	fueltype.setFueldescription(rset.getString("fueldescription"));
+			    	
+			    	list.add(fueltype);
+				}
+			    
+			    if (list.size() > 0)
+				{
+					fList = new Fueltype[list.size()];
+					int count = 0;
+					for (Fueltype drv : list)
+					{
+						fList[count] = drv;
+						count++;
+					}
+					fuels.setFueltypes(fList);
+				}
+			}
+			
+		}
+		 catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		} 
+		finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+		}
+			
+		return fuels;
+	}
+	
+	
+	public TerminalList getTerminals()
+	{
+		logger.info("getTerminal()");
+		String sql = "select terminal, description, address1, address2, city, state, zipcode from  fuelterminal";
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rset = null;
+		
+		Terminal terminal   = null;
+		Terminal[] tList  = null;
+		
+		List<Terminal>list = new ArrayList<Terminal>();
+		TerminalList terms = new TerminalList();
+		
+		try
+		{
+			conn = getConnection();
+			if (conn != null)
+			{
+				pstmt = conn.prepareStatement(sql);
+			    rset = pstmt.executeQuery();
+			    while (rset.next())
+				{
+			    	terminal = new Terminal();
+			    	terminal.setTerminal(rset.getString("terminal"));
+			    	terminal.setDescription(rset.getString("description"));
+			    	terminal.setAddress1(rset.getString("address1"));
+			    	terminal.setAddress2(rset.getString("address2"));
+			    	terminal.setCity(rset.getString("city"));
+			    	terminal.setState(rset.getString("state"));
+			    	terminal.setZipcode(rset.getString("zipcode"));
+			    	
+			    	list.add(terminal);
+				}
+			    
+			    if (list.size() > 0)
+				{
+					tList = new Terminal[list.size()];
+					int count = 0;
+					for (Terminal drv : list)
+					{
+						tList[count] = drv;
+						count++;
+					}
+					terms.setTerminal(tList);
+				}
+			}
+			
+		}
+		 catch(Exception _exx)
+		{
+			logger.error(IUtils.getPrintTrace(_exx));
+			
+		} 
+		finally
+		{
+			try
+			{
+				if (rset != null && !rset.isClosed())
+				{
+					rset.close();
+					rset = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (pstmt != null && !pstmt.isClosed())
+				{
+					pstmt.close();
+					pstmt = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+			try
+			{
+				if (conn != null && !conn.isClosed())
+				{
+					conn.close();
+					conn = null;
+				}
+			} catch(Exception _ex)
+			{
+				// ignore
+			}
+		}
+			
+		return terms;
+	}
+	
 	public EmployeeList getEmployees()
 	{
 		logger.info("getEmployees(); Started....");
@@ -1335,7 +1630,7 @@ public class SQLServices
 		
 		Employee employee = null;
 		Employee[] empList = null;
-		List<Employee>list = new ArrayList<Employee>();
+		List<Employee> list = new ArrayList<Employee>();
 		EmployeeList empls = new EmployeeList();
 		
 		try
@@ -1362,10 +1657,8 @@ public class SQLServices
 					
 					try
 					{
-					if (rset.getDate("dateofhire") != null )
-					   employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
-					}
-					catch(Exception _exx)
+						if (rset.getDate("dateofhire") != null) employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
+					} catch(Exception _exx)
 					{
 						//
 					}
@@ -1467,8 +1760,7 @@ public class SQLServices
 					employee.setFirstName(rset.getString("firstname"));
 					employee.setLastName(rset.getString("lastname"));
 					employee.setPassword(rset.getString("password"));
-					if (rset.getDate("dateofhire") != null)
-					employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
+					if (rset.getDate("dateofhire") != null) employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
 					employee.setState(rset.getString("state"));
 					employee.setSsn(rset.getString("ssn"));
 					employee.setActive(rset.getBoolean("active"));
@@ -1632,8 +1924,7 @@ public class SQLServices
 					employee.setLastName(rset.getString("lastname"));
 					employee.setPassword(rset.getString("password"));
 					
-					if (rset.getDate("dateofhire") != null)
-					employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
+					if (rset.getDate("dateofhire") != null) employee.setDateofhire(simpleDate.format(rset.getDate("dateofhire")));
 					employee.setState(rset.getString("state"));
 					employee.setSsn(rset.getString("ssn"));
 					employee.setActive(rset.getBoolean("active"));
@@ -1820,7 +2111,6 @@ public class SQLServices
 		return loginid;
 		
 	}
-
 	
 	private static String setEmployeeRole(String loginid, String role)
 	{
@@ -1888,7 +2178,6 @@ public class SQLServices
 		return loginid;
 		
 	}
-	
 	
 	public static void main(String[] args)
 	{

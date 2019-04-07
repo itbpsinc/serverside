@@ -1,5 +1,8 @@
 package com.itbps.fuelmgt;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Fueltype {
 	private String fuelname;
 	private String fueldescription;

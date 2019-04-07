@@ -26,9 +26,12 @@ import com.google.gson.JsonParser;
 import com.itbps.exception.UserExistingException;
 import com.itbps.exception.UserNotFoundException;
 import com.itbps.fuelmgt.Authval;
+import com.itbps.fuelmgt.DriverList;
 import com.itbps.fuelmgt.Employee;
 import com.itbps.fuelmgt.EmployeeList;
+import com.itbps.fuelmgt.FueltypeList;
 import com.itbps.fuelmgt.ItemterminalpickupList;
+import com.itbps.fuelmgt.TerminalList;
 import com.itbps.fuelmgt.sql.SQLServices;
 import com.itbps.jersey.Todo;
 import com.itbps.jersey.TodoDao;
@@ -170,6 +173,69 @@ public class ITBPSApplicationServices extends  ResourceConfig
 		}
 		
 	}
+	
+	@GET
+	@Path("/driverList")
+	@PermitAll
+	
+	@Produces("application/json")
+	public Response driverList()
+	{
+		//@RolesAllowed({ "Admin" })
+		try
+		{
+		   DriverList  dList = new SQLServices().getDrivers();
+		   return ResponseBuilder.createResponse(Response.Status.OK, dList);
+		   
+		}
+		catch( Exception e ) {
+			return ResponseBuilder.createResponse( Response.Status.NOT_FOUND, e.getMessage() );
+		}
+		
+	}
+	
+	@GET
+	@Path("/fuelList")
+	@PermitAll
+	
+	@Produces("application/json")
+	public Response fuelList()
+	{
+		//@RolesAllowed({ "Admin" })
+		try
+		{
+		   FueltypeList  dList = new SQLServices().getFueltypes();
+		   return ResponseBuilder.createResponse(Response.Status.OK, dList);
+		   
+		}
+		catch( Exception e ) {
+			return ResponseBuilder.createResponse( Response.Status.NOT_FOUND, e.getMessage() );
+		}
+		
+	}
+	
+	
+	@GET
+	@Path("/terminals")
+	@PermitAll
+	
+	@Produces("application/json")
+	public Response getTerminals()
+	{
+		//@RolesAllowed({ "Admin" })
+		try
+		{
+		   TerminalList  dList = new SQLServices().getTerminals();
+		   return ResponseBuilder.createResponse(Response.Status.OK, dList);
+		   
+		}
+		catch( Exception e ) {
+			return ResponseBuilder.createResponse( Response.Status.NOT_FOUND, e.getMessage() );
+		}
+		
+	}
+	
+	
 	
 	@POST
 	@Path("/adddEmployee")

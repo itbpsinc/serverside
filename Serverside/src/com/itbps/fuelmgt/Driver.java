@@ -1,18 +1,67 @@
 package com.itbps.fuelmgt;
 
 import java.util.Date;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class Driver {
-	private String driverid;
+	private int driverid;
 	private String licenseno;
 	private String licensestate;
-	private Date licenseexpirationdate;
+	private String licenseexpirationdate;
+	private String firstname;
+	private String lastname;
+	private boolean active;
+	private String nameid;
+	
+	
 
-	public String getDriverid() {
+	
+	public String getFirstname()
+	{
+		return firstname;
+	}
+
+	public void setFirstname(String firstname)
+	{
+		this.firstname = firstname;
+	}
+
+	public String getLastname()
+	{
+		return lastname;
+	}
+
+	public void setLastname(String lastname)
+	{
+		this.lastname = lastname;
+	}
+
+	public String getNameid()
+	{
+		return nameid;
+	}
+
+	public void setNameid(String nameid)
+	{
+		this.nameid = nameid;
+	}
+
+	public boolean isActive()
+	{
+		return active;
+	}
+
+	public void setActive(boolean active)
+	{
+		this.active = active;
+	}
+
+	public int getDriverid() {
 		return driverid;
 	}
 
-	public void setDriverid(String driverid) {
+	public void setDriverid(int driverid) {
 		this.driverid = driverid;
 	}
 
@@ -32,11 +81,11 @@ public class Driver {
 		this.licensestate = licensestate;
 	}
 
-	public Date getLicenseexpirationdate() {
+	public String getLicenseexpirationdate() {
 		return licenseexpirationdate;
 	}
 
-	public void setLicenseexpirationdate(Date licenseexpirationdate) {
+	public void setLicenseexpirationdate(String licenseexpirationdate) {
 		this.licenseexpirationdate = licenseexpirationdate;
 	}
 
